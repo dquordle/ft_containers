@@ -58,17 +58,17 @@ int main(int argc, char** argv) {
 	ft::vector<std::string> vector_str;
 	ft::vector<int>::pointer p;
 
-	vector_str.insert(vector_str.begin(), "0");
-	vector_str.insert(vector_str.begin(), "1");
-	vector_str.insert(vector_str.begin(), "2");
-	vector_str.insert(vector_str.begin(), "3");
-	vector_str.insert(vector_str.begin(), "4");
-	vector_str.insert(vector_str.begin(), 5, "5");
-
-	for (ft::vector<std::string>::iterator it = vector_str.begin(); it != vector_str.end(); it++)
-	{
-		std::cout << *it << std::endl;
-	}
+//	vector_str.insert(vector_str.begin(), "0");
+//	vector_str.insert(vector_str.begin(), "1");
+//	vector_str.insert(vector_str.begin(), "2");
+//	vector_str.insert(vector_str.begin(), "3");
+//	vector_str.insert(vector_str.begin(), "4");
+//	vector_str.insert(vector_str.begin(), 5, "5");
+//
+//	for (ft::vector<std::string>::iterator it = vector_str.begin(); it != vector_str.end(); it++)
+//	{
+//		std::cout << *it << std::endl;
+//	}
 
 	ft::vector<int> vector_int;
 //	ft::stack<int> stack_int;

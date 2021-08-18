@@ -13,9 +13,9 @@ namespace ft
 		{
 		private:
 			S* it;
-			VectorIterator() : it(nullptr) {};
 			friend class vector<T>;
 		public:
+			VectorIterator() : it(nullptr) {};
 			VectorIterator(S* p) : it(p) {};
 			VectorIterator(VectorIterator<S> const & src)
 			{
@@ -154,7 +154,7 @@ namespace ft
 		}
 
 		vector(int count, const T& value = T())
-		: _capacity(count), _size(count)
+		: _size(count), _capacity(count)
 		{
 			_elements = _allocator.allocate(count + 1);
 			for (int i = 0; i < count; i++)
@@ -174,12 +174,19 @@ namespace ft
 
 		vector (const vector& x)
 		{
-			*this = x;
+			_elements = _allocator.allocate(x._size + 1);
+			for (size_type i = 0; i < x._size; i++)
+			{
+				_allocator.construct(_elements + i, x._elements[i]);
+			}
+			_elements[x._size] = T();
+			_size = x._size;
+			_capacity = _size;
 		}
 
 		~vector()
 		{
-			for (int i = 0; i < _size + 1; i++)
+			for (size_type i = 0; i < _size + 1; i++)
 			{
 				_allocator.destroy(_elements + i);
 			}
@@ -190,19 +197,20 @@ namespace ft
 		{
 			if (this == &x)
 				return *this;
-			for (int i = 0; i < _size + 1; i++)
+			for (size_type i = 0; i < _size + 1; i++)
 			{
 				_allocator.destroy(_elements + i);
 			}
 			_allocator.deallocate(_elements, _capacity + 1);
 			_elements = _allocator.allocate(x._size + 1);
-			for (int i = 0; i < x._size; i++)
+			for (size_type i = 0; i < x._size; i++)
 			{
 				_allocator.construct(_elements + i, x._elements[i]);
 			}
 			_elements[x._size] = T();
 			_size = x._size;
 			_capacity = _size;
+			return *this;
 		}
 
 
@@ -264,7 +272,8 @@ namespace ft
 			{
 				if (n > _capacity)
 					reserve(n);
-				for (size_type i = _size + 1; i < n + 1; i++)
+				_elements[n] = _elements[_size];
+				for (size_type i = _size; i < n + 1; i++)
 					_allocator.construct(_elements + i, val);
 			}
 			else if (n < _size)
@@ -291,13 +300,14 @@ namespace ft
 		{
 			if (n > _capacity)
 			{
-				_capacity = n;
-				T* temp = _allocator.allocate(_capacity + 1);
-				for (int i = 0; i < _size + 1; i++)
+				T *temp = _allocator.allocate(n + 1);
+				for (size_type i = 0; i < _size + 1; i++)
+				{
 					_allocator.construct(temp + i, _elements[i]);
-				for (int j = 0; j < _size + 1; j++)
-					_allocator.destroy(_elements + j);
+					_allocator.destroy(_elements + i);
+				}
 				_allocator.deallocate(_elements, _capacity + 1);
+				_capacity = n;
 				_elements = temp;
 			}
 		}
@@ -361,7 +371,7 @@ namespace ft
 		{
 			clear();
 			reserve(n);
-			for (int i = 0;  i < n; i++)
+			for (size_type i = 0;  i < n; i++)
 				_allocator.construct(_elements + i, val);
 			_allocator.construct(_elements + n, T());
 			_size = n;
@@ -397,10 +407,10 @@ namespace ft
 			}
 			if (_size == _capacity)
 			{
-				_capacity *= 2;
 				if (_capacity == 0)
-					_capacity++;
-				reserve(_capacity);
+					reserve(1);
+				else
+					reserve(_capacity * 2);
 			}
 			size_type in2 = _size + 1;
 			while (in2 != index)
@@ -424,20 +434,22 @@ namespace ft
 			}
 			if (_capacity < _size + n)
 			{
-				_capacity *= 2;
-				if (_capacity < _size + n)
-					_capacity = _size + n;
-				reserve(_capacity);
+				if (_capacity * 2 < _size + n)
+					reserve(_size + n);
+				else
+					reserve(_capacity * 2);
 			}
 			size_type in2 = _size;
-			while (in2 + 1 != index)
+			while (in2 >= index)
 			{
 				_elements[in2 + n] = _elements[in2];
+				if (in2 == 0)
+					break;
 				in2--;
 			}
 			_size += n;
 			while (n > 0)
-				_elements[in2 + --n] = val;
+				_allocator.construct(_elements + index + --n, val);
 		}
 
 		template <class InputIterator>
@@ -451,7 +463,7 @@ namespace ft
 				index++;
 			}
 			size_type n = 0;
-			InputIterator temp;
+			InputIterator temp = first;
 			while (temp != last)
 			{
 				temp++;
@@ -459,42 +471,53 @@ namespace ft
 			}
 			if (_capacity < _size + n)
 			{
-				_capacity *= 2;
-				if (_capacity < _size + n)
-					_capacity = _size + n;
-				reserve(_capacity);
+				if (_capacity * 2 < _size + n)
+					reserve(_size + n);
+				else
+					reserve(_capacity * 2);
 			}
 			size_type in2 = _size;
-			while (in2 != index)
+			while (in2 >= index)
 			{
 				_elements[in2 + n] = _elements[in2];
+				if (in2 == 0)
+					break;
 				in2--;
 			}
 			_size += n;
-			while (n > 0)
+			size_type i = 0;
+			temp = first;
+			while (i < n)
 			{
-				_allocator.construct(_elements + in2 + --n,  *first);
-				first++;
+				_allocator.construct(_elements + index + i++,  *temp);
+				temp++;
 			}
 		}
 
 		iterator erase(iterator position)
 		{
 			_allocator.destroy(position.it);
-			for (iterator it = position; it != end(); it++)
-				*it = *(it + 1);
+			for (iterator it = position, prev = it++; prev != end(); it++, prev++)
+				*prev = *it;
 			_size--;
 			return position;
 		}
 
 		iterator erase(iterator first, iterator last)
 		{
-			size_type temp = _size;
-			for (iterator it = first; it != last; it++, _size--)
-				_allocator.destroy(it.it);
-			for (iterator it = first; last != end(); last++)
-				*it = *last;
-			_elements[_size] = _elements[temp];
+			size_type index = 0;
+			iterator it = begin();
+			while (it != first)
+			{
+				it++;
+				index++;
+			}
+			size_type temp = 0;
+			for (iterator iter = first; iter != last; iter++, temp++)
+				_allocator.destroy(_elements + index + temp);
+			for (size_type i = 0 ; i < _size - index - temp; i++)
+				_elements[index + i] = _elements[index + i + temp];
+			_size -= temp;
 			return first;
 		}
 
@@ -517,7 +540,7 @@ namespace ft
 
 		void clear()
 		{
-			for (int i = 0; i < _size; i++)
+			for (size_type i = 0; i < _size; i++)
 				_allocator.destroy(_elements + i);
 			_size = 0;
 		}
