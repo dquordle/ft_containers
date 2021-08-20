@@ -7,7 +7,7 @@
 	#include <vector>
 	namespace ft = std;
 #else
-//	#include "map.hpp"
+	#include "map.hpp"
 	#include "stack.hpp"
 	#include "vector.hpp"
 #endif
@@ -74,7 +74,8 @@ int main(int argc, char** argv) {
 	ft::stack<int> stack_int;
 	ft::vector<Buffer> vector_buffer;
 	ft::stack<Buffer, std::deque<int> > stack_deq_buffer;
-//	ft::map<int, int> map_int;
+	ft::map<int, int> map_int;
+//	ft::map<int, int>::
 //
 	for (int i = 0; i < COUNT; i++)
 	{
