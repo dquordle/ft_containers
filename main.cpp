@@ -14,7 +14,8 @@
 
 #include <stdlib.h>
 
-#define MAX_RAM 4294967296
+//#define MAX_RAM 4294967296
+#define MAX_RAM 429412
 #define BUFFER_SIZE 4096
 struct Buffer
 {
@@ -97,7 +98,7 @@ int main(int argc, char** argv) {
 	ft::vector<int> vector_int;
 	ft::stack<int> stack_int;
 	ft::vector<Buffer> vector_buffer;
-	ft::stack<Buffer, std::deque<int> > stack_deq_buffer;
+//	ft::stack<Buffer, std::deque<int> > stack_deq_buffer;
 	ft::map<int, int> map_int;
 
 
@@ -160,5 +161,5 @@ int main(int argc, char** argv) {
 //		normal->push_back(1);
 //		std::cout << normal->capacity() << std::endl;
 //	}
-		return (0);
+	return (0);
 }

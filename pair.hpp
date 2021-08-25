@@ -19,16 +19,17 @@ namespace ft
 		template<class U, class V>
 		pair(const pair<U,V>& pr) : first(pr.first), second(pr.second) {}
 
-		pair(const first_type& a, const second_type& b)
-		{
-			first = first_type(a);
-			second = second_type(b);
-		}
+		pair(const first_type& a, const second_type& b) : first(a), second(b) {}
+
+		~pair() {};
 
 		pair& operator= (const pair& pr)
 		{
-			first = pr.first;
-			second = pr.second;
+			if (this != &pr)
+			{
+				first = pr.first;
+				second = pr.second;
+			}
 			return *this;
 		}
 	};

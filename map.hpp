@@ -13,10 +13,10 @@ namespace ft
 
 		typedef struct Node
 		{
-			ft::pair<Key, T>	pair;
-			Node*				left;
-			Node*				right;
-			Node*				parent;
+			ft::pair<const Key, T>	pair;
+			Node*					left;
+			Node*					right;
+			Node*					parent;
 
 			Node() : pair(pair()), left(nullptr), right(nullptr), parent(nullptr) {}
 			Node(ft::pair<Key, T> newPair, Node* newLeft, Node* newRight, Node* newParent) :
@@ -28,7 +28,7 @@ namespace ft
 		{
 		private:
 			TreeNode* it;
-			friend class map<Key, T>;
+			friend class map<Key, T, Compare>;
 		public:
 			MapIterator() : it(nullptr) {};
 			MapIterator(TreeNode* p) : it(p) {};
@@ -52,11 +52,11 @@ namespace ft
 				return it != src.it;
 			}
 
-			V & operator*()
+			V & operator*() const
 			{
 				return it->pair;
 			}
-			V * operator->()
+			V * operator->() const
 			{
 				return &(it->pair);
 			}
@@ -224,8 +224,8 @@ namespace ft
 		typedef const value_type*								const_pointer;
 		typedef	MapIterator<value_type>							iterator;
 		typedef MapIterator<const value_type>					const_iterator;
-		typedef	std::reverse_iterator<iterator>					reverse_iterator;
-		typedef	std::reverse_iterator<const_iterator>			const_reverse_iterator;
+		typedef	ReverseMapIterator<value_type>					reverse_iterator;
+		typedef	ReverseMapIterator<const value_type>			const_reverse_iterator;
 		typedef ptrdiff_t										difference_type;
 		typedef size_t											size_type;
 
@@ -287,7 +287,7 @@ namespace ft
 				while (temp->left)
 					temp = temp->left;
 			}
-			return iterator(temp);
+			return const_iterator(temp);
 		}
 
 		iterator end()
@@ -308,7 +308,7 @@ namespace ft
 				while (temp->right)
 					temp = temp->right;
 			}
-			return iterator(temp);
+			return reverse_iterator(temp);
 		}
 
 		const_reverse_iterator rbegin() const
@@ -319,13 +319,14 @@ namespace ft
 				while (temp->right)
 					temp = temp->right;
 			}
-			return iterator(temp);
+			return const_reverse_iterator(temp);
 		}
 
 		reverse_iterator rend()
 		{
 			return reverse_iterator(nullptr);
 		}
+
 		const_reverse_iterator rend() const
 		{
 			return const_reverse_iterator(nullptr);
@@ -351,12 +352,13 @@ namespace ft
 
 		mapped_type& operator[] (const key_type& k)
 		{
-//			for (const_iterator it = begin(); it != end(); it++)
-//			{
-//				if (it.it->pair.first == k)
-//					return it.it->pair.second;
-//			}
-			return (*((this->insert(make_pair(k,mapped_type()))).first)).second;
+//			iterator it = find(k);
+//			if (it != end())
+//				return it.it->pair.second;
+//			value_type val = ft::make_pair(k, mapped_type());
+//			pair<iterator, bool> p = insert(val);
+//			return p.first.it->pair.second;
+			return (*((this->insert(ft::make_pair(k,mapped_type()))).first)).second;
 		}
 
 		pair<iterator,bool> insert (const value_type& val)
@@ -367,9 +369,9 @@ namespace ft
 				_head = _allocator.allocate(1);
 				_allocator.construct(_head, TreeNode(val, nullptr, nullptr, nullptr));
 				_size++;
-				return make_pair(iterator(_head), true);
+				return ft::make_pair(iterator(_head), true);
 			}
-			while (node)
+			while (true)
 			{
 				if (_comp(val.first, node->pair.first))
 				{
@@ -378,7 +380,7 @@ namespace ft
 						node->left = _allocator.allocate(1);
 						_allocator.construct(node->left, TreeNode(val, nullptr, nullptr, node));
 						_size++;
-						return make_pair(iterator(node->left), true);
+						return ft::make_pair(iterator(node->left), true);
 					}
 					node = node->left;
 				}
@@ -389,12 +391,12 @@ namespace ft
 						node->right = _allocator.allocate(1);
 						_allocator.construct(node->right, TreeNode(val, nullptr, nullptr, node));
 						_size++;
-						return make_pair(iterator(node->right), true);
+						return ft::make_pair(iterator(node->right), true);
 					}
 					node = node->right;
 				}
 				else
-					return make_pair(iterator(node), false);
+					return ft::make_pair(iterator(node), false);
 			}
 		}
 
@@ -426,6 +428,8 @@ namespace ft
 					else
 						node->left = nullptr;
 				}
+				else
+					_head = nullptr;
 			}
 			else if (node == _head)
 			{
@@ -433,6 +437,7 @@ namespace ft
 					_head = node->left;
 				else
 					_head = node->right;
+				_head->parent = nullptr;
 			}
 			else if (!node->left)
 			{
@@ -472,7 +477,8 @@ namespace ft
 				else
 					par->left = temp;
 				temp->right = node->right;
-				node->right->parent = temp;
+				if (node->right)
+					node->right->parent = temp;
 				temp->left = node->left;
 				node->left->parent = temp;
 			}
@@ -484,7 +490,7 @@ namespace ft
 		size_type erase (const key_type& k)
 		{
 			iterator it = find(k);
-			if (k != end())
+			if (it != end())
 			{
 				erase(it);
 				return 1;
@@ -634,7 +640,7 @@ namespace ft
 			const_iterator start = end;
 			if (!_comp(k, end.it->pair.first) && !_comp(end.it->pair.first, k))
 				end++;
-			return make_pair(start, end);
+			return ft::make_pair(start, end);
 		}
 
 		pair<iterator,iterator> equal_range (const key_type& k)
@@ -643,7 +649,7 @@ namespace ft
 			iterator start = end;
 			if (!_comp(k, end.it->pair.first) && !_comp(end.it->pair.first, k))
 				end++;
-			return make_pair(start, end);
+			return ft::make_pair(start, end);
 		}
 
 		allocator_type get_allocator() const
