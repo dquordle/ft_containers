@@ -5,7 +5,7 @@
 
 namespace ft
 {
-	template<typename T>
+	template<typename T, class Alloc = std::allocator<T> >
 	class vector
 	{
 
@@ -149,7 +149,7 @@ namespace ft
 		typedef ReverseVectorIterator<const T>			const_reverse_iterator;
 
 
-		vector<T>() : _size(0), _capacity(0)
+		vector() : _size(0), _capacity(0)
 		{
 			_elements = _allocator.allocate(1);
 			_elements[0] = T();

@@ -10,12 +10,13 @@
 	#include "map.hpp"
 	#include "stack.hpp"
 	#include "vector.hpp"
+	#include "set.hpp"
 #endif
 
 #include <stdlib.h>
 
-//#define MAX_RAM 4294967296
-#define MAX_RAM 429412
+#define MAX_RAM 4294967296
+//#define MAX_RAM 429412
 #define BUFFER_SIZE 4096
 struct Buffer
 {
@@ -100,6 +101,7 @@ int main(int argc, char** argv) {
 	ft::vector<Buffer> vector_buffer;
 //	ft::stack<Buffer, std::deque<int> > stack_deq_buffer;
 	ft::map<int, int> map_int;
+	ft::set<int> set_int;
 
 
 	for (int i = 0; i < COUNT; i++)
@@ -132,9 +134,9 @@ int main(int argc, char** argv) {
 	{
 		map_int.insert(ft::make_pair(rand(), rand()));
 	}
-
+	std::cout << "hi" << std::endl;
 	int sum = 0;
-	for (int i = 0; i < 10000; i++)
+	for (int i = 0; i < 1000000; i++)
 	{
 		int access = rand();
 		sum += map_int[access];
@@ -155,6 +157,13 @@ int main(int argc, char** argv) {
 
 	ft::vector<int> *normal = new ft::vector<int>();
 	std::cout << normal->capacity() << std::endl;
+
+	for (int i = 0; i < 1000000; i++)
+	{
+		int access = rand();
+		set_int.insert(access);
+	}
+	set_int.test();
 //
 //	for (unsigned int loop = 0; loop != 10; ++loop)
 //	{

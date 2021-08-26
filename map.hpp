@@ -79,7 +79,7 @@ namespace ft
 						it = it->parent;
 					}
 				}
-				return (*this);
+				return *this;
 			}
 
 			MapIterator & operator--()
@@ -100,19 +100,21 @@ namespace ft
 						it = it->parent;
 					}
 				}
-				return (*this);
+				return *this;
 			}
+
 			MapIterator operator++(int)
 			{
 				MapIterator<V> temp = *this;
 				++(*this);
-				return (temp);
+				return temp;
 			}
+
 			MapIterator operator--(int)
 			{
 				MapIterator<V> temp = *this;
 				--(*this);
-				return (temp);
+				return temp;
 			}
 		};
 
@@ -172,7 +174,7 @@ namespace ft
 						it = it->parent;
 					}
 				}
-				return (*this);
+				return *this;
 			}
 
 			ReverseMapIterator & operator--()
@@ -193,21 +195,21 @@ namespace ft
 						it = it->parent;
 					}
 				}
-				return (*this);
+				return *this;
 			}
 
 			ReverseMapIterator operator++(int)
 			{
 				ReverseMapIterator<V> temp = *this;
 				++(*this);
-				return (temp);
+				return temp;
 			}
 
 			ReverseMapIterator operator--(int)
 			{
 				ReverseMapIterator<V> temp = *this;
 				--(*this);
-				return (temp);
+				return temp;
 			}
 
 		};
@@ -231,6 +233,7 @@ namespace ft
 
 	private:
 		TreeNode*			_head;
+		TreeNode*			_last;
 		size_type			_size;
 		allocator_type		_allocator;
 		key_compare			_comp;
@@ -238,19 +241,20 @@ namespace ft
 
 	public:
 		explicit map(const key_compare& comp = key_compare()) :
-		_head(nullptr), _size(0), _comp(comp) {}
+		_head(nullptr), _last(nullptr), _size(0), _comp(comp) {}
 
 		template <class InputIterator>
 		map(InputIterator first, InputIterator last, const key_compare& comp = key_compare()) :
-		_head(nullptr), _size(0), _comp(comp)
+		_head(nullptr), _last(nullptr), _size(0), _comp(comp)
 		{
 			insert(first, last);
 		}
 
 		map(const map& x) :
-		_head(nullptr), _size(0), _comp(x._comp)
+		_head(nullptr), _last(nullptr), _size(0), _comp(x._comp)
 		{
-			insert(x.begin(), x.end());
+			for (const_iterator it = x.begin(); it != x.end(); it++)
+				insert(end(), *it);
 		}
 
 		~map()
@@ -263,7 +267,8 @@ namespace ft
 			if (this != &x)
 			{
 				clear();
-				insert(x.begin(), x.end());
+				for (const_iterator it = x.begin(); it != x.end(); it++)
+					insert(end(), *it);
 			}
 			return *this;
 		}
@@ -352,12 +357,6 @@ namespace ft
 
 		mapped_type& operator[] (const key_type& k)
 		{
-//			iterator it = find(k);
-//			if (it != end())
-//				return it.it->pair.second;
-//			value_type val = ft::make_pair(k, mapped_type());
-//			pair<iterator, bool> p = insert(val);
-//			return p.first.it->pair.second;
 			return (*((this->insert(ft::make_pair(k,mapped_type()))).first)).second;
 		}
 
@@ -369,6 +368,7 @@ namespace ft
 				_head = _allocator.allocate(1);
 				_allocator.construct(_head, TreeNode(val, nullptr, nullptr, nullptr));
 				_size++;
+				_last = _head;
 				return ft::make_pair(iterator(_head), true);
 			}
 			while (true)
@@ -391,6 +391,8 @@ namespace ft
 						node->right = _allocator.allocate(1);
 						_allocator.construct(node->right, TreeNode(val, nullptr, nullptr, node));
 						_size++;
+						if (node == _last)
+							_last = node->right;
 						return ft::make_pair(iterator(node->right), true);
 					}
 					node = node->right;
@@ -402,7 +404,14 @@ namespace ft
 
 		iterator insert (iterator position, const value_type& val)
 		{
-			(void)position;
+			if (position == end() && _head && _comp(_last->pair.first, val.first))
+			{
+				_last->right = _allocator.allocate(1);
+				_allocator.construct(_last->right, TreeNode(val, nullptr, nullptr, _last));
+				_size++;
+				_last = _last->right;
+				return iterator(_last);
+			}
 			return insert(val).first;
 		}
 
@@ -417,6 +426,12 @@ namespace ft
 		{
 			TreeNode* node = position.it;
 
+			if (_last == node)
+			{
+				iterator newLast = position;
+				newLast--;
+				_last = newLast.it;
+			}
 			if (!node->right && !node->left)
 			{
 				if (node->parent)
@@ -510,10 +525,13 @@ namespace ft
 		void swap (map& x)
 		{
 			TreeNode*	temp_head = _head;
+			TreeNode*	temp_last = _last;
 			size_type	temp_size = _size;
 			_head = x._head;
+			_last = x._last;
 			_size = x._size;
 			x._head = temp_head;
+			x._last = temp_last;
 			x._size = temp_size;
 		}
 
