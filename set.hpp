@@ -15,7 +15,7 @@ namespace ft
 
 		typedef struct Node
 		{
-			const T		value;
+			T			value;
 			Node*		left;
 			Node*		right;
 			Node*		parent;
@@ -433,9 +433,37 @@ namespace ft
 				insert(*temp);
 		}
 
-		void erase (iterator position) //////////
+		void erase (iterator position)
 		{
+			TreeNode* node = position.it;
 
+			if (_last == node)
+			{
+				iterator newLast = position;
+				newLast--;
+				_last = newLast.it;
+			}
+
+			if (node->right && node->left)
+			{
+				TreeNode *temp = node->right;
+				while (temp->left)
+					temp = temp->left;
+				node->value = temp->value;
+				node = temp;
+			}
+
+			if (node == _head && _size == 1)
+				_head = nullptr;
+			else
+			{
+				delete_one_child(node);
+				if (_head == node)
+					_head = node->right ? node->right : node->left;
+			}
+			_allocator.destroy(node);
+			_allocator.deallocate(node, 1);
+			_size--;
 		}
 
 		size_type erase (const value_type& val)
@@ -451,11 +479,13 @@ namespace ft
 
 		void erase (iterator first, iterator last)
 		{
-			for (iterator it = first; it != last; )
-			{
-				iterator temp = it++;
-				erase(temp);
-			}
+//			for (iterator it = first; it != last; )
+//			{
+//				iterator temp = it++;
+//				erase(temp);
+//			}
+			while (_size > 0)
+				erase(begin());
 		}
 
 		void swap (set& x)
@@ -545,25 +575,36 @@ namespace ft
 		}
 
 		////////////////////////////////////
-		void test()
-		{
-			TreeNode* node = _head;
-			std::cout << "HEAD : " << node->value << std::endl;
-			std::cout << "Left side:" << std::endl;
-			while (node->left)
-			{
-				std::cout << node->value << std::endl;
-				node = node->left;
-			}
-
-			std::cout << "Right side:" << std::endl;
-			node = _head;
-			while (node->right)
-			{
-				std::cout << node->value << std::endl;
-				node = node->right;
-			}
-		}
+//		void test()
+//		{
+//			if (_size == 0)
+//			{
+//				std::cout << "Set is empty" << std::endl;
+//				return ;
+//			}
+//			TreeNode* node = _head;
+//			std::cout << "HEAD : " << node->value << std::endl;
+//			std::cout << "Left side:" << std::endl;
+//			int count = 0;
+//			while (node)
+//			{
+//				std::cout << node->value << std::endl;
+//				node = node->left;
+//				count++;
+//			}
+//			std::cout << "Left height: " << count << std::endl;
+//			std::cout << "/////////////////////////////" << std::endl;
+//			std::cout << "Right side:" << std::endl;
+//			node = _head;
+//			count = 0;
+//			while (node)
+//			{
+//				std::cout << node->value << std::endl;
+//				node = node->right;
+//				count++;
+//			}
+//			std::cout << "Right height: " << count << std::endl;
+//		}
 		///////////////////////////////
 
 
@@ -596,7 +637,7 @@ namespace ft
 				return n->parent->left;
 		}
 
-
+		//////////////////////////////////////
 		void rotate_left(TreeNode *n)
 		{
 			TreeNode *pivot = n->right;
@@ -616,6 +657,8 @@ namespace ft
 
 			n->parent = pivot;
 			pivot->left = n;
+			if (_head == n)
+				_head = pivot;
 		}
 
 		void rotate_right(TreeNode *n)
@@ -635,8 +678,12 @@ namespace ft
 				pivot->right->parent = n;
 			n->parent = pivot;
 			pivot->right = n;
+			if (_head == n)
+				_head = pivot;
 		}
 
+
+		////////////////////////////////
 		void insert_case1(TreeNode *n)
 		{
 			if (n->parent == NULL)
@@ -696,6 +743,145 @@ namespace ft
 				rotate_right(g);
 			else
 				rotate_left(g);
+		}
+
+		////////////////////////////////////
+
+		void replace_node(TreeNode* n, TreeNode* child)
+		{
+			if (child)
+				child->parent = n->parent;
+			if (n->parent)
+			{
+				if (n == n->parent->left)
+					n->parent->left = child;
+				else
+					n->parent->right = child;
+			}
+		}
+
+		void delete_one_child(TreeNode *n)
+		{
+			TreeNode *child = n->left ? n->left : n->right;
+
+			if (child)
+				replace_node(n, child);
+			if (n->color == BLACK)
+			{
+				if (child && child->color == RED)
+					child->color = BLACK;
+				else
+				{
+					if (!child)
+						delete_case1(n);
+					else
+						delete_case1(child);
+				}
+			}
+			if (!child)
+				replace_node(n, child);
+		}
+
+		void
+		delete_case1(TreeNode *n)
+		{
+			if (n->parent)
+				delete_case2(n);
+		}
+
+		void delete_case2(TreeNode *n)
+		{
+			TreeNode *s = sibling(n);
+
+			if (s->color == RED)
+			{
+				n->parent->color = RED;
+				s->color = BLACK;
+				if (n == n->parent->left)
+					rotate_left(n->parent);
+				else
+					rotate_right(n->parent);
+			}
+			delete_case3(n);
+		}
+
+		void delete_case3(TreeNode *n)
+		{
+			TreeNode *s = sibling(n);
+
+			if ((n->parent->color == BLACK) && (!s ||
+				((s->color == BLACK) &&
+				(!s->left || s->left->color == BLACK) &&
+				(!s->right || s->right->color == BLACK))))
+			{
+				s->color = RED;
+				delete_case1(n->parent);
+			}
+			else
+				delete_case4(n);
+		}
+
+		void delete_case4(TreeNode *n)
+		{
+			TreeNode *s = sibling(n);
+
+			if ((n->parent->color == RED) &&
+				(s->color == BLACK) &&
+				(!s->left || s->left->color == BLACK) &&
+				(!s->right || s->right->color == BLACK))
+			{
+				s->color = RED;
+				n->parent->color = BLACK;
+			}
+			else
+				delete_case5(n);
+		}
+
+		void delete_case5(TreeNode *n)
+		{
+			TreeNode *s = sibling(n);
+
+			if  (s->color == BLACK)
+			{
+				if ((n == n->parent->left) &&
+					(!s->right || s->right->color == BLACK) &&
+					(s->left && s->left->color == RED))
+				{
+					s->color = RED;
+					s->left->color = BLACK;
+					rotate_right(s);
+				}
+				else if ((n == n->parent->right) &&
+					(!s->left || s->left->color == BLACK) &&
+					(s->right && s->right->color == RED))
+				{
+					s->color = RED;
+					s->right->color = BLACK;
+					rotate_left(s);
+				}
+			}
+			delete_case6(n);
+		}
+		
+		void delete_case6(TreeNode *n)
+		{
+			TreeNode *s = sibling(n);
+
+			s->color = n->parent->color;
+			n->parent->color = BLACK;
+
+			if (n == n->parent->left)
+			{
+				if (s->right)
+					s->right->color = BLACK;
+				rotate_left(n->parent);
+			}
+			else
+			{
+				if (s->left)
+					s->left->color = BLACK;
+				rotate_right(n->parent);
+			}
 		}
 	};
 }

@@ -5,6 +5,7 @@
 	#include <map>
 	#include <stack>
 	#include <vector>
+	#include <set>
 	namespace ft = std;
 #else
 	#include "map.hpp"
@@ -16,7 +17,6 @@
 #include <stdlib.h>
 
 #define MAX_RAM 4294967296
-//#define MAX_RAM 429412
 #define BUFFER_SIZE 4096
 struct Buffer
 {
@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
 	}
 	const int seed = atoi(argv[1]);
 	srand(seed);
-//
+
 	ft::vector<std::string> vector_str;
 	ft::vector<int>::pointer p;
 
@@ -163,7 +163,11 @@ int main(int argc, char** argv) {
 		int access = rand();
 		set_int.insert(access);
 	}
-	set_int.test();
+//	set_int.test();
+	set_int.clear();
+	set_int.erase(2144812431);
+//	set_int.test();
+	std::cout << "hi " << std::endl;
 //
 //	for (unsigned int loop = 0; loop != 10; ++loop)
 //	{
