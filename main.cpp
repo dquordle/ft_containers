@@ -27,30 +27,6 @@ struct Buffer
 
 #define COUNT (MAX_RAM / (int)sizeof(Buffer))
 
-#include <iostream>
-#include <map>
-#include <string>
-
-//int main ()
-//{
-//	std::map<char,std::string> mymap;
-//
-//	mymap['a']="an element";
-//	mymap['a']="an elemento";
-//	mymap['b']="another element";
-//	mymap['c']=mymap['b'];
-//
-//	std::cout << "mymap['a'] is " << mymap['a'] << '\n';
-//	std::cout << "mymap['a'] is " << mymap['a'] << '\n';
-//	std::cout << "mymap['b'] is " << mymap['b'] << '\n';
-//	std::cout << "mymap['c'] is " << mymap['c'] << '\n';
-//	std::cout << "mymap['d'] is " << mymap['d'] << '\n';
-//
-//	std::cout << "mymap now contains " << mymap.size() << " elements.\n";
-//
-//	return 0;
-//}
-
 template<typename T>
 class MutantStack : public ft::stack<T>
 {
@@ -82,7 +58,6 @@ int main(int argc, char** argv) {
 	srand(seed);
 
 	ft::vector<std::string> vector_str;
-	ft::vector<int>::pointer p;
 
 	vector_str.insert(vector_str.begin(), "0");
 	vector_str.insert(vector_str.begin(), "1");
@@ -96,10 +71,18 @@ int main(int argc, char** argv) {
 		std::cout << *it << std::endl;
 	}
 
+	vector_str.assign(8, "8");
+
+	for (ft::vector<std::string>::iterator it = vector_str.begin(); it != vector_str.end(); it++)
+	{
+		std::cout << *it << std::endl;
+	}
+
+
 	ft::vector<int> vector_int;
 	ft::stack<int> stack_int;
 	ft::vector<Buffer> vector_buffer;
-//	ft::stack<Buffer, std::deque<int> > stack_deq_buffer;
+	ft::stack<Buffer, std::deque<Buffer> > stack_deq_buffer;
 	ft::map<int, int> map_int;
 	ft::set<int> set_int;
 
@@ -130,21 +113,37 @@ int main(int argc, char** argv) {
 		//NORMAL ! :P
 	}
 
+	ft::map<char,std::string> mymap;
+
+	mymap['a']="an element";
+	mymap['a']="el elemento";
+	mymap['b']="another element";
+	mymap['c']=mymap['b'];
+
+	std::cout << "mymap['a'] is " << mymap['a'] << '\n';
+	std::cout << "mymap['b'] is " << mymap['b'] << '\n';
+	std::cout << "mymap['c'] is " << mymap['c'] << '\n';
+	std::cout << "mymap['d'] is " << mymap['d'] << '\n';
+
+	std::cout << "mymap now contains " << mymap.size() << " elements.\n";
+
+
 	for (int i = 0; i < COUNT; ++i)
 	{
-		map_int.insert(ft::make_pair(rand(), rand()));
+		map_int.insert(ft::make_pair(rand() % COUNT, rand() % COUNT));
 	}
-	std::cout << "hi" << std::endl;
+
 	int sum = 0;
-	for (int i = 0; i < 1000000; i++)
+	for (int i = 0; i < 10000; i++)
 	{
-		int access = rand();
+		int access = rand() % COUNT;
 		sum += map_int[access];
 	}
 	std::cout << "should be constant with the same seed: " << sum << std::endl;
 
 	{
 		ft::map<int, int> copy = map_int;
+		std::cout << "map was copied successfully" << std::endl;
 	}
 	MutantStack<char> iterable_stack;
 	for (char letter = 'a'; letter <= 'z'; letter++)
@@ -165,14 +164,10 @@ int main(int argc, char** argv) {
 	}
 //	set_int.test();
 	set_int.clear();
-	set_int.erase(2144812431);
 //	set_int.test();
 	std::cout << "hi " << std::endl;
-//
-//	for (unsigned int loop = 0; loop != 10; ++loop)
-//	{
-//		normal->push_back(1);
-//		std::cout << normal->capacity() << std::endl;
-//	}
+
 	return (0);
 }
+
+//-950062408
